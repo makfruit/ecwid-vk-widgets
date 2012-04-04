@@ -1,20 +1,17 @@
 /*
  * A script for Ecwid to display Vkontakte social widgets (like, share, comments) on the product pages.
  * Please include it after the Ecwid integration code.
- *
- * Required: Ecwid Product API, jQuery
- *
  */
 
 function dbg(v) {
-  alert(v);
+  console.log(v);
 }
 
 
 var EcwidVkWidgets = (function(module) {
   // Private
   var _config;
-  var _activeWidgets = []; // dbg: what's happening here?
+  var _activeWidgets = [];
 
   // Extend module or object
   function _extend(target, src, isRecursive) {
@@ -47,18 +44,11 @@ var EcwidVkWidgets = (function(module) {
 
     return target;
   }
-  /*
-  function _extend(isRecursive, dest, src) {
-    return $.extend(isRecursive, dest, src);
-  }
-  */
   
   // Set configuration
   function _setConfig(userConfig) {
+    dbg('_____hey!');
     _config = _extend(EcwidVkWidgets.DefaultConfig, userConfig, true);
-    dbg(_config.vkApiId); // dbgstop: vkApiId isn't set
-    dbg(EcwidVkWidgets.DefaultConfig.vkApiId);
-    dbg(userConfig.vkApiId);
   }
 
   // Check if at least widget is enabled
@@ -68,9 +58,8 @@ var EcwidVkWidgets = (function(module) {
 
   // Prepare and show widgets on teh current page
   function _showProductPageWidgets() {
-    alert('pageLoader');
     // Get the product information
-    var productInfo = getEcwidProductInfo();
+    var productInfo = EcwidVkWidgets.EcwidApi.getEcwidProductInfo();
 
     // Get the page URL
     var pageUrl = window.location;
@@ -102,12 +91,12 @@ var EcwidVkWidgets = (function(module) {
     }
   }
 
-  var _load = function(config) {
+  var _load = function(config) { // dbg: var?
     // Check if Ecwid is loaded
     if (
       typeof (window.Ecwid) !== 'object' // dbg: removed vkApiId check
     ) {
-      //return; //dbg
+      return; //dbg: console.warn or console.error
     }
 
     // Set configuration
@@ -142,6 +131,9 @@ var EcwidVkWidgets = (function(module) {
   ));
 }(EcwidVkWidgets || {}));
 
+/*
+ * DefaultConfig
+ */
 EcwidVkWidgets.DefaultConfig = (function(module) {
   // Widgets' default settings. Please refer to the Vkontakte API documentation for details.
   var _config = {
@@ -193,13 +185,13 @@ EcwidVkWidgets.DefaultConfig = (function(module) {
 
 
 /*
- *
+ * Loader
  */
 EcwidVkWidgets.Loader = (function(module) {
   // Private
   var _scripts = [];
   var _numScripts = 0;
-  var _completeCallback = function() {};
+  var _completeCallback = function() {}; //dbg : comment
 
   function _onScriptLoaded() {
     if (--_numScripts <= 0) {
@@ -207,14 +199,14 @@ EcwidVkWidgets.Loader = (function(module) {
     }
   }
 
-  var _injectJs = function(src, callback) { // dbg: rename
+  var _injectJs = function(src, callback) {
     var script = document.createElement("script");
     script.setAttribute("src", src);
     script.charset = "utf-8";
     script.setAttribute("type", "text/javascript");
     script.onreadystatechange = script.onload = callback;
-    document.getElementsByTagName('HEAD').item(0).appendChild(script);
-    //document.body.appendChild(script);
+    //document.getElementsByTagName('HEAD').item(0).appendChild(script);
+    document.body.appendChild(script);
   }
 
   var _load = function(dependencies, callback) {
@@ -253,6 +245,20 @@ EcwidVkWidgets.Loader = (function(module) {
 
 })(EcwidVkWidgets.Loader || {});
 
+/*
+ * console wrapper
+ */
+EcwidVkWidgets.Console = (function(module) {
+  // Private
+  /*
+  function _log() {
+    
+    for(var i=0; i<arguments.length; i++) s += arguments[i]
+
+    console.log();
+  } 
+  */
+})(EcwidVkWidgets.Console || {});
 
 // Operating with page and Ecwid object
 EcwidVkWidgets.EcwidApi = (function(module) {
@@ -299,14 +305,15 @@ EcwidVkWidgets.EcwidApi = (function(module) {
 
 
 /*
- * Abstract Widget
+ * Abstract Widget (as cached mixin)
  */
 EcwidVkWidgets.Widget = (function(module) {
 
   module.createHTMLContainer = function() {
-    $('#' + _module.config.elmId).remove();
-    $(_module.config.elmParentSelector).append(
-      "<div id='" + _module.config.elmId + "' class='" + _module.config.elmCssClass + "'></div>"
+    // 'this' refers to child class
+    $('#' + this.config.elmId).remove();
+    $(this.config.elmParentSelector).append(
+      "<div id='" + this.config.elmId + "' class='" + this.config.elmCssClass + "'></div>"
     ).show(); 
   }
  
@@ -338,15 +345,15 @@ EcwidVkWidgets.WidgetsFactory = (function(module) {
         break;
 
       case 'share':
-        return new EcwidVkWidgets.LikeWidget(config);
-        break;
-
-      case 'comments':
         return new EcwidVkWidgets.ShareWidget(config);
         break;
 
-      default:
+      case 'comments':
         return new EcwidVkWidgets.CommentsWidget(config);
+        break;
+
+      default:
+        return new EcwidVkWidgets.LikeWidget(config);
     }
   }
 
@@ -374,7 +381,7 @@ EcwidVkWidgets.LikeWidget = function(config) { // dbg: think about extending
       {
         type: that.config.type,
         width: that.config.width,
-        pageTitle: that.config.productTitle,
+        pageTitle: productInfo.productTitle,
         pageDescription: EcwidVkWidgets.EcwidApi.truncateProductDescription(
           productInfo.productDescr, 
           that.config.shareTextMaxLength
@@ -397,25 +404,46 @@ EcwidVkWidgets.ShareWidget = function(config) { // dbg: think about extending
   this.config = config;
 
   var that = this;
-  this.show = function(productInfo, pageUrl) {
+  this.show = function(productInfo, pageUrl) { // dbg: why not simple using like function a() {} ? 
     that.createHTMLContainer();
-    VK.Widgets.Like(
-      that.config.elmId, 
-      {
-        type: that.config.type,
-        width: that.config.width,
-        pageTitle: that.config.productTitle,
-        pageDescription: EcwidVkWidgets.EcwidApi.truncateProductDescription(
+    $('#' + that.config.elmId).html(
+      VK.Share.button({
+        url: pageUrl,
+        title: productInfo.productTitle,
+        description: EcwidVkWidgets.EcwidApi.truncateProductDescription(
           productInfo.productDescr, 
           that.config.shareTextMaxLength
         ),
-        pageUrl: pageUrl,
-        pageImage: productInfo.imageUrl,
-        text: productInfo.productTitle,
+        image: productInfo.imageUrl,
+        noparse: that.config.noparse
+      })
+    );
+  }
+}
+EcwidVkWidgets.Widget.call(EcwidVkWidgets.ShareWidget.prototype);
+
+/*
+ * Comments Widget (extends Widget)
+ */
+EcwidVkWidgets.CommentsWidget = function(config) { // dbg: think about extending
+  this.config = config;
+
+  var that = this;
+  this.show = function(productInfo, pageUrl) {
+    that.createHTMLContainer();
+    VK.Widgets.Comments(
+      that.config.elmId, 
+      {
+        width: that.config.width,
+        limit: that.config.limit,
+        attach: that.config.attach,
+        autoPublish: that.config.autoPublish,
+        mini: that.config.mini,
         height: that.config.height,
-        verb: that.config.verb
+        norealtime: that.config.norealtime,
+        pageUrl: pageUrl
       }
     );
   }
 }
-EcwidVkWidgets.Widget.call(EcwidVkWidgets.LikeWidget.prototype);
+EcwidVkWidgets.Widget.call(EcwidVkWidgets.CommentsWidget.prototype);
