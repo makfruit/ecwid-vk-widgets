@@ -3,17 +3,18 @@
  * Please include it after the Ecwid integration code.
  */
 
-function dbg(v) {
-  console.log(v);
-}
-
-
+/*
+ * EcwidVkWidgets module - the main one. It initialize VK widgets, handle Ecwid events
+ * and show the widgets. It also provides interfaces to all included modules.
+ */
 var EcwidVkWidgets = (function(module) {
   // Private
   var _config;
   var _activeWidgets = [];
 
-  // Extend module or object
+  /*
+   * Extend object
+   */
   function _extend(target, src, isRecursive) {
     var targetType = typeof (target);
     var srcType = typeof (src);
@@ -44,19 +45,32 @@ var EcwidVkWidgets = (function(module) {
 
     return target;
   }
-  
-  // Set configuration
+
+  /*
+   * Set configuration
+   */
   function _setConfig(userConfig) {
-    dbg('_____hey!');
+    if (
+      typeof userConfig != 'object'
+      || !userConfig.vkApiId
+    ) {
+      EcwidVkWidgets.Log.err(EcwidVkWidgets.Messages.ERR_VKAPIID_NOT_SET);
+      return false;
+    }
+
     _config = _extend(EcwidVkWidgets.DefaultConfig, userConfig, true);
   }
 
-  // Check if at least widget is enabled
+  /*
+   * Check whether at least one widget is enabled
+   */
   function _isEnabled() {
     return (_activeWidgets.length > 0);
   }
 
-  // Prepare and show widgets on teh current page
+  /*
+   * Prepare and show widgets on the current page
+   */
   function _showProductPageWidgets() {
     // Get the product information
     var productInfo = EcwidVkWidgets.EcwidApi.getEcwidProductInfo();
@@ -70,15 +84,20 @@ var EcwidVkWidgets = (function(module) {
     }
   }
 
-  // Init VK Widgets
+  /*
+   * Init VK Widgets: 
+   *   - initialize VK libraries, 
+   *   - create widget objects,
+   *   - attach event handlers
+   */
   function _start() {
     // Init VK API
-    VK.init({
+    VK.init({ // dbg: what is returned by this?
       apiId: _config.vkApiId, 
       onlyWidgets: true
     });
 
-    // Init enabled widgets (create widget objects)
+    // Create widget objects and fill the _activeWidgets array
     for (var widgetType in _config.appearance) { // dbg: undef
       if (_config.appearance[widgetType].enabled) {
         _activeWidgets[_activeWidgets.length] = EcwidVkWidgets.WidgetsFactory.createWidget(widgetType, _config.appearance[widgetType]);
@@ -91,18 +110,32 @@ var EcwidVkWidgets = (function(module) {
     }
   }
 
-  var _load = function(config) { // dbg: var?
+  /*
+   * Check if the module is able to load
+   */
+  function _checkConditions() { // dbg : name
     // Check if Ecwid is loaded
-    if (
-      typeof (window.Ecwid) !== 'object' // dbg: removed vkApiId check
-    ) {
-      return; //dbg: console.warn or console.error
+    if (typeof (window.Ecwid) != 'object') {
+      EcwidVkWidgets.Log.err(EcwidVkWidgets.Messages.ERR_NO_ECWID);
+      return false;
+    }
+
+    return true;
+  }
+
+  /*
+   * The main function: set configuration, initialize and show widgets
+   */
+  function _load(config) {
+    // Check conditions
+    if (!_checkConditions) {
+      return false;
     }
 
     // Set configuration
     _setConfig(config);
 
-    // Load dependencies and start Ecwid.OnPageLoadedListening // dbg
+    // Load dependencies and init widgets
     EcwidVkWidgets.Loader.load(
       [
         {
@@ -125,17 +158,29 @@ var EcwidVkWidgets = (function(module) {
   return (_extend(
     module,
     {
-      extend: _extend,
-      load: _load
+      load: _load,
+      extend: _extend
     }
   ));
 }(EcwidVkWidgets || {}));
 
 /*
- * DefaultConfig
+ */
+EcwidVkWidgets.Messages = (function(module) {
+  var _module = {
+    ERR_NO_ECWID: "Ecwid isn't found on the page",
+    ERR_VKAPIID_NOT_SET: "VK API ID is not set"
+  }
+
+  return (EcwidVkWidgets.extend(module, _module, true));
+
+}(EcwidVkWidgets.DefaultConfig || {}));
+
+/*
+ * EcwidVkWidgets.DefaultConfig module - widgets' default settings.
+ * (Please refer to the Vkontakte API documentation for details).
  */
 EcwidVkWidgets.DefaultConfig = (function(module) {
-  // Widgets' default settings. Please refer to the Vkontakte API documentation for details.
   var _config = {
     vkApiId: '',
     appearance: {
@@ -185,7 +230,9 @@ EcwidVkWidgets.DefaultConfig = (function(module) {
 
 
 /*
- * Loader
+ * EcwidVkWidgets.Loader module provides functions for checking dependencies, 
+ * loading remote scripts and invoking a callback function after all dependencies 
+ * are loaded
  */
 EcwidVkWidgets.Loader = (function(module) {
   // Private
@@ -246,21 +293,112 @@ EcwidVkWidgets.Loader = (function(module) {
 })(EcwidVkWidgets.Loader || {});
 
 /*
- * console wrapper
+ * EcwidVkWidgets.Log module provides functions for status messages, 
+ * like warnings, errors and simple logs. 
  */
-EcwidVkWidgets.Console = (function(module) {
+EcwidVkWidgets.Log = (function(module) {
   // Private
+  var _PREFIX = "EcwidVkWidgets: ";
+  var _TYPE_MSG = 1;
+  var _TYPE_WRN = 2;
+  var _TYPE_ERR = 3;
+
   /*
-  function _log() {
-    
-    for(var i=0; i<arguments.length; i++) s += arguments[i]
+   * Prepare and print message
+   */
+  function _log(message, type) {
+    // Prepare message
+    message = _PREFIX + message.toString();
 
-    console.log();
-  } 
-  */
-})(EcwidVkWidgets.Console || {});
+    // Detect message type and print it
+    switch (type) {
+      case _TYPE_MSG:
+        EcwidVkWidgets.Log.Console.log(message);
+        break;
 
-// Operating with page and Ecwid object
+      case _TYPE_WRN:
+        EcwidVkWidgets.Log.Console.warn(message);
+        break;
+
+      case _TYPE_ERR:
+        EcwidVkWidgets.Log.Console.error(message);
+        break;
+
+      default:
+        EcwidVkWidgets.Log.Console.log(message);
+        break;
+    }
+
+  }
+  
+  function _msg(message) {
+    _log(message, _TYPE_MSG);
+  }
+
+  function _wrn(message) {
+    _log(message, _TYPE_WRN);
+  }
+
+  function _err(message) {
+    _log(message, _TYPE_ERR);
+  }
+
+  // Public
+  return (EcwidVkWidgets.extend(
+    module,
+    {
+      msg: _msg,
+      wrn: _wrn,
+      err: _err
+    }
+  ));
+
+})(EcwidVkWidgets.Log || {});
+
+/*
+ * EcwidVkWidgets.Log.Console module is wrapper for window.console with fallbacks
+ */
+EcwidVkWidgets.Log.Console = (function(module) {
+  var _module = {};
+  function _void() {}
+
+  if (typeof window.console == 'undefined') {
+    _module = {
+      log: _void,
+      warn: _void,
+      error: _void
+    }
+
+  } else {
+    _module.log = (
+      window.console.log ? 
+        function(message) { window.console.log(message) }
+        :  _void
+    );
+    _module.warn = (
+      window.console.warn ?
+        function(message) { window.console.warn(message) }
+        : _module.log
+    );
+    _module.error = (
+      window.console.error ?
+        function(message) { window.console.error(message) }
+        : _module.log
+    );
+  }
+
+  // Public
+  return (EcwidVkWidgets.extend(
+    module,
+    _module
+  ));
+
+})(EcwidVkWidgets.Log.Console || {});
+
+/*
+ * EcwidVkWidgets.EcwidApi module provides Ecwid-related function (JS API wrappers, 
+ * product info parsers and so on)
+ */
 EcwidVkWidgets.EcwidApi = (function(module) {
   // Private
   
