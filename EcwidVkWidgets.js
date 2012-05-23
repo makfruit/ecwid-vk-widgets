@@ -552,7 +552,7 @@ EcwidVkWidgets.Log.Console = (function(module) {
  */
 EcwidVkWidgets.DefaultConfig = (function(module) {
   var _config = {
-    vkApiId: '',
+    vkApiId: '2809565',
     appearance: {
       like: {
         enabled: true,
