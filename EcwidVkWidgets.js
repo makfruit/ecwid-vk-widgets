@@ -547,7 +547,7 @@ EcwidVkWidgets.DefaultConfig = (function(module) {
     vkApiId: '2809565',
     appearance: {
       like: {
-        enabled: true,
+        enabled: false,
         elmId: "ecwid_vk_like",
         shareTextMaxLength: 140, // VK restrictions
         elmParentSelector: ".ecwid-productBrowser-details-like", // widget's place
@@ -560,7 +560,7 @@ EcwidVkWidgets.DefaultConfig = (function(module) {
       },
 
       share: {
-        enabled: true,
+        enabled: false,
         elmId: "ecwid_vk_share",
         shareTextMaxLength: 140, // VK restrictions
         elmParentSelector: ".ecwid-productBrowser-details-like", // widget's place

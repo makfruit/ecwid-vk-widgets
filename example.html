@@ -9,31 +9,31 @@
 
 <script>
 
-/* Only comments */
+/* Default settings. Only comments widget is enabled */
+EcwidVkWidgets.load();
+
+
+/* Enable like and share widgets. By default, they will be placed under the product price */
+/*
 EcwidVkWidgets.load({
 	appearance: {
 		like: {
-			enabled: false
+			enabled: true
 		},
 		share: {
-			enabled: false
+			enabled: true
 		}
 	}
 });
-
-
-
-/* Default settings. All widgets are enabled */
-/*
-EcwidVkWidgets.load();
 */
 
 
-/* Changing settings for the like widget (mini view) and for the comments widget (width and max number of comments) */
+/* Comments and like widgets are wnabled. Settings are changed for the like widget (mini view) and for the comments widget (width and max number of comments) */
 /*
 EcwidVkWidgets.load({
 	appearance: {
 		like: {
+			enabled: true,
 			type: 'mini'
 		},
 		comments: {
