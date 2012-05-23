@@ -548,7 +548,8 @@ EcwidVkWidgets.Log.Console = (function(module) {
 
 /*
  * EcwidVkWidgets.DefaultConfig module: widgets' default settings.
- * (Please refer to the Vkontakte API documentation for details).
+ * Please refer to the Vkontakte API documentation for the details:
+ * http://vk.com/pages?oid=-1&p=%D0%94%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D0%B0%D1%86%D0%B8%D1%8F
  */
 EcwidVkWidgets.DefaultConfig = (function(module) {
   var _config = {
