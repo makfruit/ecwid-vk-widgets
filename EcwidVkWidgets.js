@@ -1,6 +1,5 @@
 /*
  * A script for Ecwid to display Vkontakte social widgets (like, share, comments) on the product pages.
- * Please include it after the Ecwid integration code.
  */
 
 /*
