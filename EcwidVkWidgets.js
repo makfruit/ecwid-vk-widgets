@@ -40,6 +40,9 @@ var EcwidVkWidgets = (function(module) {
           target[key] = src[key];
         }
       }
+
+    } else {
+      target = src;
     }
 
     return target;
