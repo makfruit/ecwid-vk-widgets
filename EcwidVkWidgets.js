@@ -51,14 +51,6 @@ var EcwidVkWidgets = (function(module) {
    * Set configuration
    */
   function _setConfig(userConfig) {
-    if (
-      typeof userConfig != 'object'
-      || !userConfig.vkApiId
-    ) {
-      EcwidVkWidgets.Log.err(EcwidVkWidgets.Messages.ERR_VKAPIID_NOT_SET);
-      return false;
-    }
-
     _config = _extend(EcwidVkWidgets.DefaultConfig, userConfig, true);
   }
 
