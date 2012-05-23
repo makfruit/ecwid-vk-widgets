@@ -9,11 +9,15 @@
 
 <script>
 
-/* Default settings. Only comments widget is enabled */
+/* 
+Использование по умолчанию - включен только виджет комментариев 
+*/
 EcwidVkWidgets.load();
 
 
-/* Enable like and share widgets. By default, they will be placed under the product price */
+/* 
+Включение виджетов "Мне нравится" и "Сохранить". Виджет комментариев остается включенным по умолчанию. 
+*/
 /*
 EcwidVkWidgets.load({
 	appearance: {
@@ -28,7 +32,11 @@ EcwidVkWidgets.load({
 */
 
 
-/* Comments and like widgets are wnabled. Settings are changed for the like widget (mini view) and for the comments widget (width and max number of comments) */
+/* 
+Использование виджетов комментариев и "Мне нравится". Изменение внешнего вида виджетов:
+- для "Мне нравится" выбран вид "Мини" вместо полноразмерной кнопки
+- для комментариев изменена ширина поля ввода и максимальное количество комментариев  
+*/
 /*
 EcwidVkWidgets.load({
 	appearance: {
@@ -39,6 +47,28 @@ EcwidVkWidgets.load({
 		comments: {
 			width: 700,
 			limit: 5
+		}
+	}
+});
+*/
+
+/* 
+Использование только виджета "Мне нравится". Изменение параметров виджетов:
+- размещение под изображением товара,
+- уменьшение высоты до 18 пикселей,
+- изменение фразы с "Мне нравится" на "Это интересно"  
+*/
+/*
+EcwidVkWidgets.load({
+	appearance: {
+		like: {
+			enabled: true,
+			elmParentSelector: '.ecwid-productBrowser-details-thumbnail',
+			height: 18,
+			verb: 1
+		},
+		comments: {
+			enabled: false			
 		}
 	}
 });
