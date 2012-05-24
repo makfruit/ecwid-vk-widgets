@@ -51,6 +51,14 @@ var EcwidVkWidgets = (function(module) {
    * Set configuration
    */
   function _setConfig(userConfig) {
+    if (
+      typeof userConfig != 'object'
+      || !userConfig.vkApiId
+    ) {
+      EcwidVkWidgets.Log.err(EcwidVkWidgets.Messages.ERR_VKAPIID_NOT_SET);
+      return false;
+    }
+
     _config = _extend(EcwidVkWidgets.DefaultConfig, userConfig, true);
   }
 
@@ -544,7 +552,7 @@ EcwidVkWidgets.Log.Console = (function(module) {
  */
 EcwidVkWidgets.DefaultConfig = (function(module) {
   var _config = {
-    vkApiId: '2809565',
+    vkApiId: '',
     appearance: {
       like: {
         enabled: false,
