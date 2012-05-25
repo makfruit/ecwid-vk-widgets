@@ -369,6 +369,7 @@ EcwidVkWidgets.LikeWidget = function(config) {
 
   var that = this;
   this.show = function(productInfo, pageUrl) {
+    EcwidVkWidgets.Log.dbg(productInfo.imageUrl);
     that.createHTMLContainer();
     VK.Widgets.Like(
       that.config.elmId, 
