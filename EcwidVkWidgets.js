@@ -383,6 +383,7 @@ EcwidVkWidgets.LikeWidget = function(config) {
         ),
         pageUrl: pageUrl,
         pageImage: productInfo.imageUrl,
+        image: productInfo.imageUrl,
         text: productInfo.productTitle,
         height: that.config.height,
         verb: that.config.verb
