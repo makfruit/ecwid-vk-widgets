@@ -245,7 +245,7 @@ EcwidVkWidgets.EcwidApi = (function(module) {
    * Truncate text in product description according to the given limits
    */
   var _truncateProductDescription = function(text, length) {
-    return ($.trim(text).substring(0, length).split(" ").slice(0, -1).join(" ") + "...");
+    return (jQuery.trim(text).substring(0, length).split(" ").slice(0, -1).join(" ") + "...");
   }
 
   /* 
@@ -253,9 +253,9 @@ EcwidVkWidgets.EcwidApi = (function(module) {
    */
   var _getEcwidProductInfo = function() {
     var productInfo = {
-      'imageUrl': $('.ecwid-productBrowser-details-thumbnail > img').attr('src'),
-      'productTitle': $('.ecwid-productBrowser-head').text(),
-      'productDescr': $('.ecwid-productBrowser-details-descr').text()
+      'imageUrl': jQuery('.ecwid-productBrowser-details-thumbnail > img').attr('src'),
+      'productTitle': jQuery('.ecwid-productBrowser-head').text(),
+      'productDescr': jQuery('.ecwid-productBrowser-details-descr').text()
     };
     return productInfo;
   }
@@ -294,8 +294,8 @@ EcwidVkWidgets.Widget = (function(module) {
 
   module.createHTMLContainer = function() {
     // Here, 'this' refers to child class
-    $('#' + this.config.elmId).remove();
-    $(this.config.elmParentSelector).append(
+    jQuery('#' + this.config.elmId).remove();
+    jQuery(this.config.elmParentSelector).append(
       "<div id='" + this.config.elmId + "' class='" + this.config.elmCssClass + "'></div>"
     ).show(); 
   }
@@ -401,7 +401,7 @@ EcwidVkWidgets.ShareWidget = function(config) {
   var that = this;
   this.show = function(productInfo, pageUrl) {
     that.createHTMLContainer();
-    $('#' + that.config.elmId).html(
+    jQuery('#' + that.config.elmId).html(
       VK.Share.button({
         url: pageUrl,
         title: productInfo.productTitle,
