@@ -72,9 +72,10 @@ var EcwidVkWidgets = (function(module) {
   /*
    * Prepare and show widgets on the current page
    */
-  function _showProductPageWidgets() {
+  function _showProductPageWidgets(ecwidPage) {
     // Get the product information
     var productInfo = EcwidVkWidgets.EcwidApi.getEcwidProductInfo();
+    productInfo.productId = ecwidPage.productId;
 
     // Get the page URL
     var pageUrl = window.location;
@@ -270,7 +271,7 @@ EcwidVkWidgets.EcwidApi = (function(module) {
         typeof (page) == 'object'
         && 'PRODUCT' == page.type
       ) {
-        callback();
+        callback(page);
       }
     });
   }
@@ -298,6 +299,11 @@ EcwidVkWidgets.Widget = (function(module) {
     jQuery(this.config.elmParentSelector).append(
       "<div id='" + this.config.elmId + "' class='" + this.config.elmCssClass + "'></div>"
     ).show(); 
+  }
+
+  module.getUniquePageID = function(productInfo) {
+    // Get a unique string that identifies the page
+    return productInfo.productId;
   }
 
   /*
@@ -386,7 +392,8 @@ EcwidVkWidgets.LikeWidget = function(config) {
         text: productInfo.productTitle,
         height: that.config.height,
         verb: that.config.verb
-      }
+      },
+      that.getUniquePageID(productInfo)
     );
   }
 }
@@ -437,7 +444,8 @@ EcwidVkWidgets.CommentsWidget = function(config) {
         height: that.config.height,
         norealtime: that.config.norealtime,
         pageUrl: pageUrl
-      }
+      },
+      that.getUniquePageID(productInfo)
     );
   }
 }
