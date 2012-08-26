@@ -139,11 +139,11 @@ var EcwidVkWidgets = (function(module) {
           sources: ['https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js']
         },
         {
-          test: window.VK.init,
+          test: window.VK && window.VK.init,
           sources: ['http://userapi.com/js/api/openapi.js?48']
         },
         {
-          test: window.VK.Share,
+          test: window.VK && window.VK.Share,
           sources: ['https://vkontakte.ru/js/api/share.js?9']
         }
       ],
