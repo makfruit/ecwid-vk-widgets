@@ -81,7 +81,7 @@ var EcwidVkWidgets = (function(module) {
     var pageUrl = window.location;
 
     // Show widgets
-    for (var i in _activeWidgets) {
+    for (var i = 0; i < _activeWidgets.length; i++) {
       _activeWidgets[i].show(productInfo, pageUrl);
     }
   }
@@ -201,12 +201,12 @@ EcwidVkWidgets.Loader = (function(module) {
     _completeCallback = callback;
     if (typeof dependencies !== 'undefined') {
       // Test and collect sources for loading
-      for (var d in dependencies) {
+      for (var d = 0; d < dependencies.length; d++) {
         if (
           typeof (dependencies[d].test) === 'undefined'
           && typeof (dependencies[d].sources) === 'object'
         ) {
-          for (var s in dependencies[d].sources) {
+          for (var s = 0; s < dependencies[d].sources.length; s++) {
             _scripts[_scripts.length] = dependencies[d].sources[s];
           }
         }
