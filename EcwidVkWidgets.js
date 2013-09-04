@@ -73,16 +73,12 @@ var EcwidVkWidgets = (function(module) {
    * Prepare and show widgets on the current page
    */
   function _showProductPageWidgets(ecwidPage) {
-    // Get the product information
-    var productInfo = EcwidVkWidgets.EcwidApi.getEcwidProductInfo();
-    productInfo.productId = ecwidPage.productId;
-
-    // Get the page URL
-    var pageUrl = window.location;
+    // Get the product page information
+    var productPageInfo = EcwidVkWidgets.EcwidApi.getEcwidProductPageInfo(ecwidPage);
 
     // Show widgets
     for (var i = 0; i < _activeWidgets.length; i++) {
-      _activeWidgets[i].show(productInfo, pageUrl);
+      _activeWidgets[i].show(productPageInfo);
     }
   }
 
@@ -253,13 +249,15 @@ EcwidVkWidgets.EcwidApi = (function(module) {
   /* 
    * Parse the page source and get the product information
    */
-  var _getEcwidProductInfo = function() {
-    var productInfo = {
+  var _getEcwidProductPageInfo = function(ecwidPage) {
+    var productPageInfo = {
       'imageUrl': jQuery('.ecwid-productBrowser-details-thumbnail > img').attr('src'),
       'productTitle': jQuery('.ecwid-productBrowser-head').text(),
-      'productDescr': jQuery('.ecwid-productBrowser-details-descr').text()
+      'productDescr': jQuery('.ecwid-productBrowser-details-descr').text(),
+      'productId': ecwidPage.productId,
+      'url': window.location
     };
-    return productInfo;
+    return productPageInfo;
   }
 
   /*
@@ -283,7 +281,7 @@ EcwidVkWidgets.EcwidApi = (function(module) {
     {
       attachProductPageLoadedHandler: _attachProductPageLoadedHandler,
       truncateProductDescription: _truncateProductDescription,
-      getEcwidProductInfo: _getEcwidProductInfo
+      getEcwidProductPageInfo: _getEcwidProductPageInfo
     }
   ));
 
@@ -302,9 +300,9 @@ EcwidVkWidgets.Widget = (function(module) {
     ).show(); 
   }
 
-  module.getUniquePageID = function(productInfo) {
+  module.getUniquePageID = function(productPageInfo) {
     // Get a unique string that identifies the page
-    return productInfo.productId;
+    return productPageInfo.productId;
   }
 
   /*
@@ -375,26 +373,26 @@ EcwidVkWidgets.LikeWidget = function(config) {
   this.config = config;
 
   var that = this;
-  this.show = function(productInfo, pageUrl) {
+  this.show = function(productPageInfo) {
     that.createHTMLContainer();
     VK.Widgets.Like(
       that.config.elmId, 
       {
         type: that.config.type,
         width: that.config.width,
-        pageTitle: productInfo.productTitle,
+        pageTitle: productPageInfo.productTitle,
         pageDescription: EcwidVkWidgets.EcwidApi.truncateProductDescription(
-          productInfo.productDescr, 
+          productPageInfo.productDescr, 
           that.config.shareTextMaxLength
         ),
-        pageUrl: pageUrl,
-        pageImage: productInfo.imageUrl,
-        image: productInfo.imageUrl,
-        text: productInfo.productTitle,
+        pageUrl: window.encodeURI(productPageInfo.url),
+        pageImage: productPageInfo.imageUrl,
+        image: productPageInfo.imageUrl,
+        text: productPageInfo.productTitle,
         height: that.config.height,
         verb: that.config.verb
       },
-      that.getUniquePageID(productInfo)
+      that.getUniquePageID(productPageInfo)
     );
   }
 }
@@ -407,17 +405,17 @@ EcwidVkWidgets.ShareWidget = function(config) {
   this.config = config;
 
   var that = this;
-  this.show = function(productInfo, pageUrl) {
+  this.show = function(productPageInfo) {
     that.createHTMLContainer();
     jQuery('#' + that.config.elmId).html(
       VK.Share.button({
-        url: pageUrl,
-        title: productInfo.productTitle,
+        url: window.encodeURI(productPageInfo.url),
+        title: productPageInfo.productTitle,
         description: EcwidVkWidgets.EcwidApi.truncateProductDescription(
-          productInfo.productDescr, 
+          productPageInfo.productDescr, 
           that.config.shareTextMaxLength
         ),
-        image: productInfo.imageUrl,
+        image: productPageInfo.imageUrl,
         noparse: that.config.noparse
       })
     );
@@ -432,7 +430,7 @@ EcwidVkWidgets.CommentsWidget = function(config) {
   this.config = config;
 
   var that = this;
-  this.show = function(productInfo, pageUrl) {
+  this.show = function(productPageInfo) {
     that.createHTMLContainer();
     VK.Widgets.Comments(
       that.config.elmId, 
@@ -444,9 +442,9 @@ EcwidVkWidgets.CommentsWidget = function(config) {
         mini: that.config.mini,
         height: that.config.height,
         norealtime: that.config.norealtime,
-        pageUrl: pageUrl
+        pageUrl: window.encodeURI(productPageInfo.url)
       },
-      that.getUniquePageID(productInfo)
+      that.getUniquePageID(productPageInfo)
     );
   }
 }
