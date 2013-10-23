@@ -86,6 +86,16 @@ var EcwidVkWidgets = (function(module) {
   }
 
   /*
+   * Hide widgets on the current page
+   */
+  function _hideProductPageWidgets() {
+    // Hide widgets
+    for (var i = 0; i < _activeWidgets.length; i++) {
+      _activeWidgets[i].hide();
+    }
+  }
+
+  /*
    * Init VK Widgets: 
    *   - initialize VK libraries, 
    *   - create widget objects,
@@ -111,9 +121,13 @@ var EcwidVkWidgets = (function(module) {
       }
     }
     
-    // Attach handlers if needed
+    // Attach Ecwid event handlers
     if (_isEnabled()) {
-      EcwidVkWidgets.EcwidApi.attachProductPageLoadedHandler(_showProductPageWidgets);
+      // Hide VK widget upon each store page loading
+      EcwidVkWidgets.EcwidApi.attachPageLoadedHandler(_hideProductPageWidgets);
+
+      // Show VK widgets on product details pages
+      EcwidVkWidgets.EcwidApi.attachPageLoadedHandler(_showProductPageWidgets, 'PRODUCT');
     }
   }
 
@@ -263,18 +277,27 @@ EcwidVkWidgets.EcwidApi = (function(module) {
     return productPageInfo;
   }
 
-  /*
+
+   /*
    * Assign a handler to the Ecwid.OnPageLoaded event
    */
-  var _attachProductPageLoadedHandler = function(callback) {
-    //Ecwid.OnPageLoaded.add(func);
-    Ecwid.OnPageLoaded.add(function(page) {
-      if (
-        typeof (page) == 'object'
-        && 'PRODUCT' == page.type
-      ) {
+  var _attachPageLoadedHandler = function(callback, pageType) {
+    var handler;    
+    if (pageType) {
+      handler = function(page) {
+        if (page.type == pageType) {
+          callback(page);
+        }
+      };
+
+    } else {
+      handler = function(page) {
         callback(page);
-      }
+      };
+    }
+    
+    Ecwid.OnPageLoaded.add(function(page) {
+      handler(page);      
     });
   }
 
@@ -282,7 +305,7 @@ EcwidVkWidgets.EcwidApi = (function(module) {
   return (EcwidVkWidgets.extend(
     module,
     {
-      attachProductPageLoadedHandler: _attachProductPageLoadedHandler,
+      attachPageLoadedHandler: _attachPageLoadedHandler,      
       truncateProductDescription: _truncateProductDescription,
       getEcwidProductPageInfo: _getEcwidProductPageInfo
     }
@@ -296,11 +319,14 @@ EcwidVkWidgets.EcwidApi = (function(module) {
 EcwidVkWidgets.Widget = (function(module) {
 
   module.createHTMLContainer = function() {
-    // Here, 'this' refers to child class
-    jQuery('#' + this.config.elmId).remove();
+    // Here, 'this' refers to child class    
     jQuery(this.config.elmParentSelector).append(
       "<div id='" + this.config.elmId + "' class='" + this.config.elmCssClass + "'></div>"
     ).show(); 
+  }
+
+  module.removeHTMLContainer = function() {
+    jQuery('#' + this.config.elmId).remove(); 
   }
 
   module.getUniquePageID = function(productPageInfo) {
@@ -377,6 +403,7 @@ EcwidVkWidgets.LikeWidget = function(config) {
 
   var that = this;
   this.show = function(productPageInfo) {
+    that.removeHTMLContainer();
     that.createHTMLContainer();
     VK.Widgets.Like(
       that.config.elmId, 
@@ -398,6 +425,10 @@ EcwidVkWidgets.LikeWidget = function(config) {
       that.getUniquePageID(productPageInfo)
     );
   }
+
+  this.hide = function() {
+    that.removeHTMLContainer();
+  }
 }
 EcwidVkWidgets.Widget.call(EcwidVkWidgets.LikeWidget.prototype);
 
@@ -409,6 +440,7 @@ EcwidVkWidgets.ShareWidget = function(config) {
 
   var that = this;
   this.show = function(productPageInfo) {
+    that.removeHTMLContainer();
     that.createHTMLContainer();
     jQuery('#' + that.config.elmId).html(
       VK.Share.button({
@@ -423,6 +455,10 @@ EcwidVkWidgets.ShareWidget = function(config) {
       })
     );
   }
+
+  this.hide = function() {
+    that.removeHTMLContainer();
+  }
 }
 EcwidVkWidgets.Widget.call(EcwidVkWidgets.ShareWidget.prototype);
 
@@ -434,6 +470,7 @@ EcwidVkWidgets.CommentsWidget = function(config) {
 
   var that = this;
   this.show = function(productPageInfo) {
+    that.removeHTMLContainer();
     that.createHTMLContainer();
     VK.Widgets.Comments(
       that.config.elmId, 
@@ -449,6 +486,10 @@ EcwidVkWidgets.CommentsWidget = function(config) {
       },
       that.getUniquePageID(productPageInfo)
     );
+  }
+
+  this.hide = function() {
+    that.removeHTMLContainer();
   }
 }
 EcwidVkWidgets.Widget.call(EcwidVkWidgets.CommentsWidget.prototype);
