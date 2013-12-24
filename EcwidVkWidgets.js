@@ -149,15 +149,15 @@ var EcwidVkWidgets = (function(module) {
       [
         {
           test: window.jQuery,
-          sources: ['https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js']
+          sources: ['//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js']
         },
         {
           test: window.VK && window.VK.init,
-          sources: ['http://userapi.com/js/api/openapi.js?48']
+          sources: ['//vk.com/js/api/openapi.js?105']
         },
         {
           test: window.VK && window.VK.Share,
-          sources: ['https://vkontakte.ru/js/api/share.js?9']
+          sources: ['//vkontakte.ru/js/api/share.js?9']
         }
       ],
       _start
